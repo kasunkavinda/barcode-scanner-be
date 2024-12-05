@@ -11,7 +11,7 @@ import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
   cors: {
-    origin: 'http://localhost:3000', // Replace with your Next.js frontend URL
+    origin: process.env.FE_URL, // Replace with your Next.js frontend URL
     credentials: true,
   },
 }) // Enable CORS for the Next.js frontend
