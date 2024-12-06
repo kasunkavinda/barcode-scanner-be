@@ -9,6 +9,12 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
+import { PrismaClient } from '@prisma/client';
+
+export type BarcodeInput = {
+  barcode: string;
+};
+
 @WebSocketGateway({
   cors: {
     origin: process.env.FE_URL, // Replace with your Next.js frontend URL
@@ -34,10 +40,25 @@ export class BarcodeGateway
   }
 
   @SubscribeMessage('barcodex')
-  handleBarcode(@MessageBody() barcode: string): string {
+  async handleBarcode(@MessageBody() input: BarcodeInput): Promise<string> {
+    const { barcode } = input;
     console.log(`Received barcode: ${JSON.stringify(barcode)}`);
     this.server.emit('barcodeResponse', `Processed barcode: ${barcode}`);
-    return `Received: ${barcode}`;
+
+    const prisma = new PrismaClient();
+    const record = await prisma.barCodeData.upsert({
+      where: {
+        barcode,
+      },
+      create: {
+        barcode,
+      },
+      update: {
+        barcode,
+      },
+    });
+
+    return `Received: ${record}`;
   }
 }
 
